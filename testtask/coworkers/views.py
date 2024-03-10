@@ -1,3 +1,7 @@
 from django.shortcuts import render
 
-# Create your views here.
+from coworkers.models import Coworker
+
+
+def main_page(request):
+    return render(request, template_name='main_page.html')
