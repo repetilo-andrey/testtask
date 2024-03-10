@@ -1,0 +1,7 @@
+.idea
+.env
+.project
+.git
+*.pyc
+*.py~
+testtask/Makefile
