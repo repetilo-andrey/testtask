@@ -7,7 +7,7 @@ from mptt.models import TreeForeignKey
 class Coworker(models.Model):
     pib = models.CharField(max_length=254)
     position = models.CharField(max_length=254)
-    start_date = models.DateTimeField(default=timezone.now)
+    start_date = models.DateField(null=True, blank=True)
     email = models.EmailField(max_length=254)
     headman = TreeForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='children')
 
