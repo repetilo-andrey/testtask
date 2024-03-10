@@ -1,7 +1,7 @@
 import random
 from datetime import datetime, timedelta
 
-from django.db import migrations, models
+from django.db import migrations
 
 from django_seed import Seed
 
@@ -26,14 +26,15 @@ def get_coworkers_data():
     }
 
 
-def generate_coworkers(Coworker, parent=None, level=1, max_levels=8):
+def generate_coworkers(Coworker, parent=None, level=1, max_levels=7):
     if level >= max_levels:
         return
-    num_children = random.randint(level * 10, level * 20)
+    num_children = random.randint(level * 5, level * 10)
+    new_coworkers = []
     for i in range(num_children):
         coworkers_data = get_coworkers_data()
-        coworkers_data['headman_id'] = parent.id
-        coworker = Coworker.objects.create(**coworkers_data, headman=parent)
+        new_coworkers.append(Coworker.objects.create(**coworkers_data, parent=parent))
+    for coworker in new_coworkers:
         generate_coworkers(Coworker, parent=coworker, level=level + 1, max_levels=max_levels)
 
 
@@ -47,11 +48,11 @@ def generate_root_coworkers(Coworker, count):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('coworkers', '0001_initial'),
+        ('coworkers', '0002_rename_headman_coworker_parent_coworker_level_and_more'),
     ]
 
     def insert_data(apps, schema_editor):
-        Coworker = apps.get_model('coworkers', 'Coworker')
+        from coworkers.models import Coworker
         for root_coworker in generate_root_coworkers(Coworker, 200):
             generate_coworkers(Coworker, parent=root_coworker)
 
@@ -59,10 +60,5 @@ class Migration(migrations.Migration):
         pass
 
     operations = [
-        migrations.AlterField(
-            model_name='coworker',
-            name='start_date',
-            field=models.DateField(blank=True, null=True),
-        ),
         migrations.RunPython(insert_data, reverse_func),
     ]
