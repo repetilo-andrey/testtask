@@ -10,7 +10,7 @@ from rest_framework import status
 from coworkers.models import Coworker
 
 
-def main_page(request):
+def hierarchy(request):
     root_coworkers = Coworker.objects.filter(parent_id__isnull=True).order_by('pib')
     show_list = []
     for root_coworker in root_coworkers:
@@ -54,4 +54,5 @@ def table_data_json(request):
 
     total = coworkers.count()
     coworkers = coworkers[offset:limit + offset]
-    return Response({'total': total, 'rows': [coworker.serialize(editable=True) for coworker in coworkers]}, status=status.HTTP_200_OK)
+    editable = request.user.is_authenticated
+    return Response({'total': total, 'rows': [coworker.serialize(editable=editable) for coworker in coworkers]}, status=status.HTTP_200_OK)
