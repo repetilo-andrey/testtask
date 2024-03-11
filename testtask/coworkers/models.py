@@ -17,9 +17,9 @@ class Coworker(MPTTModel):
         data = {'id': self.id, 'pib': self.pib, 'position': self.position}
         return data
 
-    def serialize(self):
-        data = {'id': self.id, 'pib': self.pib, 'position': self.position,
-                'start_date': self.start_date, 'email': self.email}
-        if self.parent_id:
-            data['headman'] = {'id': self.parent_id, 'pib': self.parent.pib}
+    def serialize(self, editable=False):
+        pib = self.pib
+        if editable:
+            pib += '<a class="edit-link" href="#">Edit</a>'
+        data = {'pib': pib, 'position': self.position, 'start_date': self.start_date, 'email': self.email}
         return data

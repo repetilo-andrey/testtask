@@ -2,26 +2,24 @@
 
 {% block title %}Hierarchy{% endblock %}
 {% block content %}
-    <div class="">
-        {% for group in coworkers %}
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <span class="font-weight-bold">{{ group.0.pib }}</span> Посада: {{ group.0.position }}
-                    </h5>
-                </div>
-                <div class="card-body">
-                    {% for coworker in group.1 %}
-                        <div>
-                            <button class="btn btn-link" data-target="{{ coworker.id }}">
-                                <span class="font-weight-bold">{{ coworker.pib }}</span> Посада: {{ coworker.position }}
-                            </button>
-                        </div>
-                    {% endfor %}
-                </div>
+    {% for group in coworkers %}
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <span class="font-weight-bold">{{ group.0.pib }}</span> Посада: {{ group.0.position }}
+                </h5>
             </div>
-        {% endfor %}
-    </div>
+            <div class="card-body">
+                {% for coworker in group.1 %}
+                    <div>
+                        <button class="btn btn-link" data-target="{{ coworker.id }}">
+                            <span class="font-weight-bold">{{ coworker.pib }}</span> Посада: {{ coworker.position }}
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endfor %}
 {% endblock %}
 
 {% block scripts %}

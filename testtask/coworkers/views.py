@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -25,8 +26,32 @@ def more_coworkers(request):
     if not coworker:
         return Response(status=status.HTTP_404_NOT_FOUND)
     lower_coworkers = coworker.get_descendants().filter(level__gt=coworker.level)
-    for c in lower_coworkers:
-        print (c.id, c.pib, c.level, c.parent_id)
     data = {'coworkers': lower_coworkers, 'parent_id': obj_id}
     coworkers_html = render_to_string('hierarchy_more_coworkers.html', data)
     return Response({'html': coworkers_html}, status=status.HTTP_200_OK)
+
+
+def table_data(request):
+    return render(request, template_name='table_data.html', context={'table_data_json': reverse('table_data_json')})
+
+
+@api_view(['GET'])
+def table_data_json(request):
+    search = request.query_params.get('search')
+    offset = int(request.query_params.get('offset'))
+    limit = int(request.query_params.get('limit'))
+    sort = request.query_params.get('sort') or 'id'
+    order = request.query_params.get('order')
+
+    coworkers = Coworker.objects.all()
+    if search:
+        coworkers = coworkers.filter(Q(pib__icontains=search) | Q(start_date__icontains=search) |
+                                     Q(position__icontains=search) | Q(email__icontains=search))
+
+    if order == 'desc':
+        sort = '-' + sort
+    coworkers = coworkers.order_by(sort)
+
+    total = coworkers.count()
+    coworkers = coworkers[offset:limit + offset]
+    return Response({'total': total, 'rows': [coworker.serialize(editable=True) for coworker in coworkers]}, status=status.HTTP_200_OK)

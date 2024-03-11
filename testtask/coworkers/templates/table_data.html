@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Table Data{% endblock %}
+{% block css %}
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.22.3/dist/bootstrap-table.min.css">
+{% endblock %}
+{% block content %}
+<table id="table" data-pagination="true" data-side-pagination="server" data-search="true"
+    data-url="{{ table_data_json }}" data-toggle="table">
+    <thead>
+        <tr>
+            <th data-field="pib" data-sortable="true">ПIБ</th>
+            <th data-field="position" data-sortable="true">Посада</th>
+            <th data-field="start_date" data-sortable="true">Дата прийому</th>
+            <th data-field="email" data-sortable="true">Email</th>
+        </tr>
+    </thead>
+</table>
+{% endblock %}
+{% block scripts %}
+<script src="https://unpkg.com/bootstrap-table@1.22.3/dist/bootstrap-table.min.js"></script>
+{% endblock %}

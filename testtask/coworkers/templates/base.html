@@ -6,10 +6,23 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    {% block css %}{% endblock %}
     <link href="{% static 'styles.css' %}" rel="stylesheet">
 </head>
 
 <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item {% if request.path == '/' %}active{% endif %}">
+                    <a class="nav-link" href="/">Hierarchy</a>
+                </li>
+                <li class="nav-item {% if request.path == '/table-data/' %}active{% endif %}">
+                    <a class="nav-link" href="/table-data/">Table data</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
     <div class="container">
         {% block content %}{% endblock %}
     </div>
