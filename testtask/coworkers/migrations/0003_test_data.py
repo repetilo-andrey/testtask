@@ -3,7 +3,19 @@ from datetime import datetime, timedelta
 
 from django.db import migrations
 
-from django_seed import Seed
+from django_seed import Seed as DjangoSeed
+
+
+# Fix Seed Class language issue without changes in library
+class Seed(DjangoSeed):
+    @classmethod
+    def faker(cls, locale=None, codename=None):
+        code = codename or cls.codename(locale)
+        if code not in cls.fakers:
+            from faker import Faker
+            cls.fakers[code] = Faker(code)
+            cls.fakers[code].seed_instance(random.randint(1, 10000))
+        return cls.fakers[code]
 
 
 end_date = datetime.today()

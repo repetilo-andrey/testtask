@@ -13,6 +13,10 @@ class Coworker(MPTTModel):
     class MPTTMeta:
         order_insertion_by = ['pib']
 
+    def serialize_short(self):
+        data = {'id': self.id, 'pib': self.pib, 'position': self.position}
+        return data
+
     def serialize(self):
         data = {'id': self.id, 'pib': self.pib, 'position': self.position,
                 'start_date': self.start_date, 'email': self.email}

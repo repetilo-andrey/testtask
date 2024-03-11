@@ -4,6 +4,9 @@ from coworkers.models import Coworker
 
 
 def main_page(request):
-    a = Coworker.objects.filter(headman_id__isnull=True).first().get_family()
-    print (a)
-    return render(request, template_name='main_page.html', context={'coworkers': []})
+    root_coworkers = Coworker.objects.filter(parent_id__isnull=True).order_by('pib')
+    show_list = []
+    for root_coworker in root_coworkers:
+        show_list.append([root_coworker.serialize_short(), root_coworker.get_descendants().filter(level=1).order_by('pib')])
+    return render(request, template_name='hierarchy.html', context={'coworkers': show_list})
+

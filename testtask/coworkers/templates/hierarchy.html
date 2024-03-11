@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Hierarchy{% endblock %}
+{% block content %}
+    <div id="accordion">
+        {% for group in coworkers %}
+            <div class="card">
+                <div class="card-header" id="headingOne">
+                    <h5 class="mb-0">
+                        {{ group.0.pib }} -- {{ group.0.position }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for coworker in group.1 %}
+                        <div>
+                            <button class="btn btn-link" data-toggle="collapse" data-target="#{{ coworker.id }}" aria-expanded="true" aria-controls="{{ coworker.id }}">
+                                {{ coworker.pib }} -- {{ coworker.position }}
+                            </button>
+                            <div id="{{ coworker.id }}" class="collapse" aria-labelledby="{{ coworker.id }}" data-parent="#accordion">
+                                <div class="card-body">
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
