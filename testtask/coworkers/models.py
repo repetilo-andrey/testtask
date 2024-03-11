@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 
 from mptt.models import MPTTModel, TreeForeignKey
 
@@ -13,6 +14,9 @@ class Coworker(MPTTModel):
     class MPTTMeta:
         order_insertion_by = ['pib']
 
+    def __str__(self):
+        return self.pib
+
     def serialize_short(self):
         data = {'id': self.id, 'pib': self.pib, 'position': self.position}
         return data
@@ -20,6 +24,7 @@ class Coworker(MPTTModel):
     def serialize(self, editable=False):
         pib = self.pib
         if editable:
-            pib += '<a class="edit-link" href="#">Edit</a>'
+            link = reverse('coworker_edit_view', args=[self.id])
+            pib += '<a class="edit-link" href="%s">Edit</a>' % link
         data = {'pib': pib, 'position': self.position, 'start_date': self.start_date, 'email': self.email}
         return data

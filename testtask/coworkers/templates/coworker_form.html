@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}{% if form.instance.pk %}Edit{% else %}Add{% endif %} Coworker{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
+{% endblock %}
+
+{% block content %}
+    <h2>{% if form.instance.pk %}Edit{% else %}Add{% endif %} Coworker</h2>
+    {% if form.errors %}
+        <ul class="alert alert-danger">
+            {{ form.errors }}
+        </ul>
+    {% endif %}
+    <form method="post" action="
+        {% if form.instance.pk %}
+            {% url 'coworker_edit_view' form.instance.pk %}
+        {% else %}
+            {% url 'coworker_new_view' %}
+        {% endif %}">{% csrf_token %}
+        <div class="form-group">
+            <label>ПIБ</label>
+            {{ form.pib }}
+        </div>
+        <div class="form-group">
+            <label>Посада</label>
+            {{ form.position }}
+        </div>
+        <div class="form-group">
+            <label>Дата прийому</label>
+            {{ form.start_date }}
+        </div>
+        <div class="form-group">
+            <label>Email</label>
+            {{ form.email }}
+        </div>
+        <div class="form-group">
+            <label>Начальник</label>
+            {{ form.parent }}
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+        {% if form.instance.pk %}
+            <form method="post" action="{% url 'coworker_delete_view' form.instance.pk %}">{% csrf_token %}
+                <div class="form-group">
+                    <button type="submit" class="btn btn-danger add-button">Delete</button>
+                </div>
+            </form>
+        {% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+<script>
+    $(document).ready(function(){
+        $("#id_start_date").datepicker({
+            autoclose: true,
+            todayHighlight: true,
+            format: 'yyyy-mm-dd',
+            endDate: '+0d',
+        }).datepicker()
+    });
+</script>
+{% endblock %}

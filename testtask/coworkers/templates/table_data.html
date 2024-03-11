@@ -5,6 +5,9 @@
     <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.22.3/dist/bootstrap-table.min.css">
 {% endblock %}
 {% block content %}
+{% if request.user.is_authenticated %}
+    <div class="float-left search btn-group add-button"><a type="button" class="btn btn-primary" href="{% url 'coworker_new_view' %}">Add</a></div>
+{% endif %}
 <table id="table" data-pagination="true" data-side-pagination="server" data-search="true"
     data-url="{{ table_data_json }}" data-toggle="table">
     <thead>

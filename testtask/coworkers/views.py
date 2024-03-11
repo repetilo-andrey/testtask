@@ -1,5 +1,8 @@
+import random
+
 from django.db.models import Q
-from django.shortcuts import render
+from django.http import HttpResponseForbidden
+from django.shortcuts import render, get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.urls import reverse
 
@@ -7,6 +10,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
 
+from coworkers.forms import CoworkerForm
 from coworkers.models import Coworker
 
 
@@ -48,11 +52,51 @@ def table_data_json(request):
         coworkers = coworkers.filter(Q(pib__icontains=search) | Q(start_date__icontains=search) |
                                      Q(position__icontains=search) | Q(email__icontains=search))
 
-    if order == 'desc':
-        sort = '-' + sort
+    sort = '-' + sort if order == 'desc' else sort
     coworkers = coworkers.order_by(sort)
 
     total = coworkers.count()
     coworkers = coworkers[offset:limit + offset]
     editable = request.user.is_authenticated
-    return Response({'total': total, 'rows': [coworker.serialize(editable=editable) for coworker in coworkers]}, status=status.HTTP_200_OK)
+    return Response({'total': total, 'rows': [coworker.serialize(editable=editable) for coworker in coworkers]},
+                    status=status.HTTP_200_OK)
+
+
+def coworker_view(request, coworker_id=None):
+    if not request.user.is_authenticated:
+        return HttpResponseForbidden()
+    coworker = None
+    if coworker_id:
+        coworker = get_object_or_404(Coworker, pk=coworker_id)
+    if request.method == 'POST':
+        form = CoworkerForm(request.POST, instance=coworker)
+        if form.is_valid():
+            if coworker_id:
+                form.save()
+            else:
+                coworker = form.save()
+            return redirect(reverse('coworker_edit_view', args=[coworker.id]))
+    else:
+        form = CoworkerForm(instance=coworker)
+    return render(request, 'coworker_form.html', {'form': form})
+
+
+def coworker_delete_view(request, coworker_id=None):
+    if not request.user.is_authenticated:
+        return HttpResponseForbidden()
+    coworker = None
+    if coworker_id:
+        coworker = get_object_or_404(Coworker, pk=coworker_id)
+    if request.method == 'POST':
+        lower_coworkers = coworker.get_descendants().filter(level__gt=coworker.level)
+        if coworker.is_root_node():
+            same_lvl = Coworker.objects.filter(level=0)
+        else:
+            same_lvl = coworker.get_family()().filter(level=coworker.level)
+            if len(same_lvl) == 0:
+                same_lvl = coworker.get_family()().filter(level__lt=coworker.level)
+        for lower_coworker in lower_coworkers:
+            lower_coworker.parent = random.choice(list(same_lvl))
+        coworker.delete()
+        return redirect('table_data')
+    return redirect(reverse('coworker_edit_view', args=[coworker_id]))
