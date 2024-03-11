@@ -2,24 +2,20 @@
 
 {% block title %}Hierarchy{% endblock %}
 {% block content %}
-    <div id="accordion">
+    <div class="">
         {% for group in coworkers %}
             <div class="card">
-                <div class="card-header" id="headingOne">
+                <div class="card-header">
                     <h5 class="mb-0">
-                        {{ group.0.pib }} -- {{ group.0.position }}
+                        <span class="font-weight-bold">{{ group.0.pib }}</span> Посада: {{ group.0.position }}
                     </h5>
                 </div>
                 <div class="card-body">
                     {% for coworker in group.1 %}
                         <div>
-                            <button class="btn btn-link" data-toggle="collapse" data-target="#{{ coworker.id }}" aria-expanded="true" aria-controls="{{ coworker.id }}">
-                                {{ coworker.pib }} -- {{ coworker.position }}
+                            <button class="btn btn-link" data-target="{{ coworker.id }}">
+                                <span class="font-weight-bold">{{ coworker.pib }}</span> Посада: {{ coworker.position }}
                             </button>
-                            <div id="{{ coworker.id }}" class="collapse" aria-labelledby="{{ coworker.id }}" data-parent="#accordion">
-                                <div class="card-body">
-                                </div>
-                            </div>
                         </div>
                     {% endfor %}
                 </div>
@@ -29,5 +25,20 @@
 {% endblock %}
 
 {% block scripts %}
-
+<script>
+    $(document).ready(function(){
+        $('button.btn-link').click(function(){
+            let $this = $(this)
+            let obj_id = $this.attr('data-target')
+            if($("ul#" + obj_id).length){
+                $("ul#" + obj_id).toggle()
+            }
+            else{
+                $.get('{{ more_coworkers_url }}', {'obj_id': obj_id}, function(data, status){
+                    $this.after(data.html)
+                });
+            }
+        });
+    });
+</script>
 {% endblock %}

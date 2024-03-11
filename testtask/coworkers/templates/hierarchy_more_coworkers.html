@@ -1,0 +1,28 @@
+{% load mptt_tags %}
+<ul id="{{ parent_id }}" class="list-group">
+    {% recursetree coworkers %}
+        <li class="list-group-item
+            {% if node.level == 2 %}
+                list-group-item-primary
+            {% elif node.level == 3 %}
+                list-group-item-secondary
+            {% elif node.level == 4 %}
+                list-group-item-success
+            {% elif node.level == 5 %}
+                list-group-item-danger
+            {% elif node.level == 6 %}
+                list-group-item-warning
+            {% elif node.level == 7 %}
+                list-group-item-info
+            {% endif %}">
+            <span class="font-weight-bold">{{ node.pib }}</span> Посада: {{ node.position }} ({{node.level}}), {{node.id}}, {{node.parent_id}}
+            {% if not node.is_leaf_node %}
+                <ul class="children" style="margin-left: 5px">
+                    {{ children }}
+                </ul>
+            {% endif %}
+        </li>
+    {% endrecursetree %}
+</ul>
+
+

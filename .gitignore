@@ -5,3 +5,4 @@
 *.pyc
 *.py~
 testtask/Makefile
+db.sqlite3
