@@ -6,6 +6,10 @@
 
 {% block css %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        .select2-container-multi .select2-choices .select2-search-choice {padding: 5px 5px 5px 18px;}
+    </style>
 {% endblock %}
 
 {% block content %}
@@ -37,9 +41,20 @@
             <label>Email</label>
             {{ form.email }}
         </div>
+        <br><hr>
         <div class="form-group">
-            <label>Начальник</label>
-            {{ form.parent }}
+            <label>Оберiть Керiвника всьго пiдроздiлу</label>
+            <select name="head" id="id_head">
+                <option value="">-----</option>
+                {% for head_coworker in head_coworkers %}
+                    <option value="{{head_coworker.tree_id}}" {% if form.instance.pk and form.instance.parent_id and form.instance.parent.get_root == head_coworker %}selected="selected"{% endif %}>{{ head_coworker.pib }}</option>
+                {% endfor %}
+            </select><br>
+            <label>Новий Керiвник</label>
+            <select name="parent" id="id_parent">
+                <option value="">-----</option>
+              {% if form.instance.pk and form.instance.parent_id %}<option value="{{form.instance.parent_id}}" selected="selected">{{ form.instance.parent.pib }}</option>{% endif %}
+            </select>
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
@@ -54,6 +69,7 @@
 
 {% block scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     $(document).ready(function(){
         $("#id_start_date").datepicker({
@@ -62,6 +78,27 @@
             format: 'yyyy-mm-dd',
             endDate: '+0d',
         }).datepicker()
+
+        $('#id_head').change(function() {
+            let tree_id = $(this).val();
+            $.get("{% url 'table_data_json' %}", {'type': 'dropdown', 'tree_id': tree_id}, function(data, status){
+                $('#id_parent option[value!=""]').remove()
+                if ($('#id_parent').hasClass("select2-hidden-accessible")) {
+                    $('#id_parent').select2('destroy');
+                }
+                $('#id_parent').select2({
+                    data: data.rows,
+                })
+            });
+        })
+
+        {% if form.instance.pk %}
+            $.get("{% url 'table_data_json' %}", {'type': 'dropdown', 'tree_id': '{{ form.instance.tree_id }}'}, function(data, status){
+                $('#id_parent').select2({
+                    data: data.rows,
+                })
+            });
+        {% endif %}
     });
 </script>
 {% endblock %}

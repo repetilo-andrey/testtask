@@ -9,7 +9,7 @@
     <div class="float-left search btn-group add-button"><a type="button" class="btn btn-primary" href="{% url 'coworker_new_view' %}">Add</a></div>
 {% endif %}
 <table id="table" data-pagination="true" data-side-pagination="server" data-search="true"
-    data-url="{{ table_data_json }}" data-toggle="table">
+    data-url="{% url 'table_data_json' %}" data-toggle="table">
     <thead>
         <tr>
             <th data-field="pib" data-sortable="true">ПIБ</th>

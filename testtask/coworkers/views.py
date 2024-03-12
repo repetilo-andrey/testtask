@@ -41,11 +41,17 @@ def table_data(request):
 
 @api_view(['GET'])
 def table_data_json(request):
+    type = request.query_params.get('type')
+    if type == 'dropdown':
+        tree_id = request.query_params.get('tree_id')
+        coworkers = Coworker.objects.filter(tree_id=tree_id)
+        return Response({'rows': [{'id': c.id, 'text': c.pib} for c in coworkers]}, status=status.HTTP_200_OK)
     search = request.query_params.get('search')
     offset = int(request.query_params.get('offset'))
     limit = int(request.query_params.get('limit'))
     sort = request.query_params.get('sort') or 'id'
     order = request.query_params.get('order')
+    need_link = request.query_params.get('need_link') or '1'
 
     coworkers = Coworker.objects.all().select_related('parent')
     if search:
@@ -58,7 +64,7 @@ def table_data_json(request):
 
     total = coworkers.count()
     coworkers = coworkers[offset:limit + offset]
-    editable = request.user.is_authenticated
+    editable = request.user.is_authenticated and need_link != '0'
     return Response({'total': total, 'rows': [coworker.serialize(editable=editable) for coworker in coworkers]},
                     status=status.HTTP_200_OK)
 
@@ -82,7 +88,8 @@ def coworker_view(request, coworker_id=None):
             return redirect(reverse('coworker_edit_view', args=[coworker.id]))
     else:
         form = CoworkerForm(instance=coworker)
-    return render(request, 'coworker_form.html', {'form': form})
+        head_coworkers = Coworker.objects.filter(parent_id__isnull=True).order_by('pib')
+    return render(request, 'coworker_form.html', {'form': form, 'head_coworkers': head_coworkers})
 
 
 def coworker_delete_view(request, coworker_id=None):
