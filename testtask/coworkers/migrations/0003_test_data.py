@@ -5,6 +5,8 @@ from django.db import migrations
 
 from django_seed import Seed as DjangoSeed
 
+from coworkers.models import Coworker
+
 
 # Fix Seed Class language issue without changes in library
 class Seed(DjangoSeed):
@@ -38,7 +40,7 @@ def get_coworkers_data():
     }
 
 
-def generate_coworkers(Coworker, parent=None, level=1, max_levels=7):
+def generate_coworkers(parent=None, level=1, max_levels=7):
     if level >= max_levels:
         return
     num_children = level
@@ -47,10 +49,10 @@ def generate_coworkers(Coworker, parent=None, level=1, max_levels=7):
         coworkers_data = get_coworkers_data()
         new_coworkers.append(Coworker.objects.create(**coworkers_data, parent=parent))
     for coworker in new_coworkers:
-        generate_coworkers(Coworker, parent=coworker, level=level + 1, max_levels=max_levels)
+        generate_coworkers(parent=coworker, level=level + 1, max_levels=max_levels)
 
 
-def generate_root_coworkers(Coworker, count):
+def generate_root_coworkers(count):
     root_coworkers = []
     for i in range(count):
         root_coworkers.append(Coworker.objects.create(**get_coworkers_data()))
@@ -64,9 +66,8 @@ class Migration(migrations.Migration):
     ]
 
     def insert_data(apps, schema_editor):
-        from coworkers.models import Coworker
-        for root_coworker in generate_root_coworkers(Coworker, 60):
-            generate_coworkers(Coworker, parent=root_coworker)
+        for root_coworker in generate_root_coworkers(60):
+            generate_coworkers(parent=root_coworker)
 
     def reverse_func(apps, schema_editor):
         pass
