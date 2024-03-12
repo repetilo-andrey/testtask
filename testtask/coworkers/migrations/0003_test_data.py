@@ -41,7 +41,7 @@ def get_coworkers_data():
 def generate_coworkers(Coworker, parent=None, level=1, max_levels=7):
     if level >= max_levels:
         return
-    num_children = random.randint(level * 5, level * 10)
+    num_children = level
     new_coworkers = []
     for i in range(num_children):
         coworkers_data = get_coworkers_data()
@@ -65,7 +65,7 @@ class Migration(migrations.Migration):
 
     def insert_data(apps, schema_editor):
         from coworkers.models import Coworker
-        for root_coworker in generate_root_coworkers(Coworker, 200):
+        for root_coworker in generate_root_coworkers(Coworker, 60):
             generate_coworkers(Coworker, parent=root_coworker)
 
     def reverse_func(apps, schema_editor):

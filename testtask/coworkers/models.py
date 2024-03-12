@@ -26,5 +26,6 @@ class Coworker(MPTTModel):
         if editable:
             link = reverse('coworker_edit_view', args=[self.id])
             pib += '<a class="edit-link" href="%s">Edit</a>' % link
-        data = {'pib': pib, 'position': self.position, 'start_date': self.start_date, 'email': self.email}
+        data = {'pib': pib, 'position': self.position, 'start_date': self.start_date, 'email': self.email,
+                'parent': self.parent.pib if self.parent_id else ''}
         return data

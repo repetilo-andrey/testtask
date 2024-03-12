@@ -47,10 +47,11 @@ def table_data_json(request):
     sort = request.query_params.get('sort') or 'id'
     order = request.query_params.get('order')
 
-    coworkers = Coworker.objects.all()
+    coworkers = Coworker.objects.all().select_related('parent')
     if search:
         coworkers = coworkers.filter(Q(pib__icontains=search) | Q(start_date__icontains=search) |
-                                     Q(position__icontains=search) | Q(email__icontains=search))
+                                     Q(position__icontains=search) | Q(email__icontains=search) |
+                                     Q(parent__pib__icontains=search))
 
     sort = '-' + sort if order == 'desc' else sort
     coworkers = coworkers.order_by(sort)
@@ -72,6 +73,9 @@ def coworker_view(request, coworker_id=None):
         form = CoworkerForm(request.POST, instance=coworker)
         if form.is_valid():
             if coworker_id:
+                if coworker.parent != form.cleaned_data.get('parent'):
+                    # move lower_coworkers to another parents
+                    manage_lower_coworkers(coworker)
                 form.save()
             else:
                 coworker = form.save()
@@ -88,15 +92,25 @@ def coworker_delete_view(request, coworker_id=None):
     if coworker_id:
         coworker = get_object_or_404(Coworker, pk=coworker_id)
     if request.method == 'POST':
-        lower_coworkers = coworker.get_descendants().filter(level__gt=coworker.level)
-        if coworker.is_root_node():
-            same_lvl = Coworker.objects.filter(level=0)
-        else:
-            same_lvl = coworker.get_family()().filter(level=coworker.level)
-            if len(same_lvl) == 0:
-                same_lvl = coworker.get_family()().filter(level__lt=coworker.level)
-        for lower_coworker in lower_coworkers:
-            lower_coworker.parent = random.choice(list(same_lvl))
+        # move lower_coworkers to another parents
+        manage_lower_coworkers(coworker)
         coworker.delete()
         return redirect('table_data')
     return redirect(reverse('coworker_edit_view', args=[coworker_id]))
+
+
+def manage_lower_coworkers(coworker):
+    lower_coworkers = coworker.get_descendants().filter(level__gt=coworker.level)
+    new_parents = find_new_parents(coworker)
+    for lower_coworker in lower_coworkers:
+        lower_coworker.parent = random.choice(new_parents)
+
+
+def find_new_parents(coworker):
+    if coworker.is_root_node():
+        same_lvl = Coworker.objects.filter(level=0)
+    else:
+        same_lvl = coworker.get_family()().filter(level=coworker.level)
+        if len(same_lvl) == 0:
+            same_lvl = coworker.get_family()().filter(level__lt=coworker.level)
+    return list(same_lvl)
